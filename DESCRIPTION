@@ -1,0 +1,17 @@
+Package: LongituRF
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Louis",
+           family = "Capitaine",
+           role = c("aut", "cre"),
+           email = "Louis.capitaine@u-bordeaux.fr",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+Depends: R (>= 3.6.0)
+License: GPL-2
+Imports: stats, randomForest
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
