@@ -6,6 +6,23 @@
 \usage{
 MERT(X, Y, id, Z, iter, time, sto, delta = 0.001)
 }
+\arguments{
+\item{X}{:}
+
+\item{Y}{:}
+
+\item{id}{:}
+
+\item{Z}{:}
+
+\item{iter}{:}
+
+\item{time}{:}
+
+\item{sto}{:}
+
+\item{delta}{:}
+}
 \value{
 
 }

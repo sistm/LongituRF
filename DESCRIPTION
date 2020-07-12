@@ -10,8 +10,10 @@ Authors@R:
 Description: What the package does (one paragraph).
 Depends: R (>= 3.6.0)
 License: GPL-2
-Imports: stats, randomForest
+Imports: stats, randomForest, rpart
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Suggests: 
+    testthat
