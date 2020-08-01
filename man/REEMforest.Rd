@@ -4,32 +4,71 @@
 \alias{REEMforest}
 \title{(S)REEMforest alogorithm}
 \usage{
-REEMforest(X, Y, id, Z, iter, mtry, ntree, time, sto, delta = 0.001)
+REEMforest(
+  X,
+  Y,
+  id,
+  Z,
+  iter = 100,
+  mtry,
+  ntree = 500,
+  time,
+  sto,
+  delta = 0.001
+)
 }
 \arguments{
-\item{X}{:}
+\item{X}{\link{matrix}: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.}
 
-\item{Y}{:}
+\item{Y}{\link{vector}: A vector containing the output trajectories.}
 
-\item{id}{:}
+\item{id}{\link{vector}: Is the vector of the identifiers for the different trajectories.}
 
-\item{Z}{:}
+\item{Z}{\link{matrix}: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.}
 
-\item{iter}{:}
+\item{iter}{\link{numeric}: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}}
 
-\item{mtry}{:}
+\item{mtry}{\link{numeric}: Number of variables randomly sampled as candidates at each split. The default value is \code{p/3}.}
 
-\item{ntree}{:}
+\item{ntree}{\link{numeric}: Number of trees to grow. This should not be set to too small a number, to ensure that every input row gets predicted at least a few times. The default value is \code{ntree=500}.}
 
-\item{time}{:}
+\item{time}{\link{time}: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.}
 
-\item{sto}{:}
+\item{sto}{\link{character}: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.}
 
-\item{delta}{:}
+\item{delta}{\link{numeric}: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01}
 }
 \value{
-
+A fitted (S)REEMforest model which is a list of the following elements: \itemize{
+\item \code{forest:} Random forest obtained at the last iteration.
+\item \code{random_effects :} Predictions of random effects for different trajectories.
+\item \code{id_btilde:} Identifiers of individuals associated with the predictions \code{random_effects}.
+\item \code{var_random_effects: } Estimation of the variance covariance matrix of random effects.
+\item \code{sigma_sto: } Estimation of the volatility parameter of the stochastic process.
+\item \code{sigma: } Estimation of the residual variance parameter.
+\item \code{time: } The vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+\item \code{sto: } Stochastic process used in the model.
+\item \code{Vraisemblance:} Log-likelihood of the different iterations.
+\item \code{id: } Vector of the identifiers for the different trajectories.
+\item \code{OOB: } OOB error of the fitted random forest at each iteration.
+}
 }
 \description{
 (S)REEMforest alogorithm
+}
+\examples{
+\dontrun{
+set.seed(123)
+data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+# Train a SREEMforest model on the generated data. Should take ~ 50 secondes
+# The data are generated with a Brownian motion
+#  so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
+SREEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+SREEMF$forest # is the fitted random forest (obtaind at the last iteration).
+SREEMF$random_effects are the predicted random effects for each individual.
+SREEMF$omega are the predicted stochastic processes.
+plot(SREEMF$Vraisemblance) #evolution of the log-likelihood.
+SREEMF$OOB # OOB error at each iteration.
+}
+
 }

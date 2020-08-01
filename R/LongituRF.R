@@ -1,22 +1,49 @@
 #' (S)MERF algorithm
 #'
-#' @param X [matrix]:
-#' @param Y [vector]:
-#' @param id [vector]:
-#' @param Z [matrix]:
-#' @param iter [numeric]:
-#' @param mtry [numeric]:
-#' @param ntree [numeric]:
-#' @param time [vector]:
-#' @param sto [character]:
-#' @param delta [numeric]:
+#' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
+#' @param Y [vector]: A vector containing the output trajectories.
+#' @param id [vector]: Is the vector of the identifiers for the different trajectories.
+#' @param Z [matrix]: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.
+#' @param iter [numeric]: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}
+#' @param mtry [numeric]: Number of variables randomly sampled as candidates at each split. The default value is \code{p/3}.
+#' @param ntree [numeric]: Number of trees to grow. This should not be set to too small a number, to ensure that every input row gets predicted at least a few times. The default value is \code{ntree=500}.
+#' @param time [vector]: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' @param sto [character]: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.
+#' @param delta [numeric]: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01
 #'
 #' @import randomForest
 #' @import stats
-#' @return
+#' @return A fitted (S)MERF model which is a list of the following elements: \itemize{
+#' \item \code{forest:} Random forest obtained at the last iteration.
+#' \item \code{random_effects :} Predictions of random effects for different trajectories.
+#' \item \code{id_btilde:} Identifiers of individuals associated with the predictions \code{random_effects}.
+#' \item \code{var_random_effects: } Estimation of the variance covariance matrix of random effects.
+#' \item \code{sigma_sto: } Estimation of the volatility parameter of the stochastic process.
+#' \item \code{sigma: } Estimation of the residual variance parameter.
+#' \item \code{time: } The vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' \item \code{sto: } Stochastic process used in the model.
+#' \item \code{Vraisemblance:} Log-likelihood of the different iterations.
+#' \item \code{id: } Vector of the identifiers for the different trajectories.
+#' \item \code{OOB: } OOB error of the fitted random forest at each iteration.
+#' }
 #' @export
 #'
-MERF <- function(X,Y,id,Z,iter,mtry,ntree, time, sto, delta = 0.001){
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+#' # Train a SMERF model on the generated data. Should take ~ 50 secondes
+#' # The data are generated with a Brownian motion,
+#' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
+#' smerf <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+#' smerf$forest # is the fitted random forest (obtaind at the last iteration).
+#' smerf$random_effects are the predicted random effects for each individual.
+#' smerf$omega are the predicted stochastic processes.
+#' plot(smerf$Vraisemblance) #evolution of the log-likelihood.
+#' smerf$OOB # OOB error at each iteration.
+#' }
+#'
+MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto, delta = 0.001){
   q <- dim(Z)[2]
   nind <- length(unique(id))
   btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets al?atoires de l'individu i
@@ -257,17 +284,48 @@ gam_sto <- function(sigma,id,Z, Btilde, time, sigma2,sto, omega){
 
 #' Predict with a (S)MERF alorithm
 #'
-#' @param merf_sto :
-#' @param X :
-#' @param Z :
-#' @param id :
-#' @param time :
+#' @param merf_sto : output of (S)MERF; (S)REEMforest; (S)MERT or (S)REEMtree function.
+#' @param X [matrix]: matrix of the fixed effects for the new observations to be predicted.
+#' @param Z [matrix]: matrix of the random effects for the new observations to be predicted.
+#' @param id [vector]: vector of the identifiers of the new observations to be predicted.
+#' @param time [vector]: vector of the time measurements of the new observations to be predicted.
 #'
 #' @import stats
 #' @import randomForest
 #'
-#' @return
+#' @return vector of the predicted output for the new observations.
+#'
 #' @export
+#'
+#' @examples \dontrun{
+#' set.seed(123)
+#' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+#' REEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+#' # Then we predict on the learning sample :
+#' pred.REEMF <- predict_merf(REEMF, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' # Let's have a look at the predictions
+#' # the predictions are in red while the real output trajectories are in blue:
+#' par(mfrow=c(4,5),mar=c(2,2,2,2))
+#' for (i in unique(data$id)){
+#'   w <- which(data$id==i)
+#'   plot(data$time[w],data$Y[w],type="l",col="blue")
+#'   lines(data$time[w],pred.REEMF[w], col="red")
+#' }
+#' # Train error :
+#' mean((pred.REEMF-data$Y)^2)
+#'
+#' # The same function can be used with a fitted SMERF model:
+#' smerf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+#' pred.smerf <- predict_merf(smerf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' # Train error :
+#' mean((pred.smerf-data$Y)^2)
+#' # This function can be used even on a MERF model (when no stochastic process is specified)
+#' merf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="none")
+#' pred.merf <- predict_merf(merf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' # Train error :
+#' mean((pred.merf-data$Y)^2)
+#'
+#' }
 predict_merf <- function(merf_sto, X,Z,id,time){
   n <- length(unique(id))
   id_btilde <- merf_sto$id_btilde
@@ -540,27 +598,54 @@ Moy <- function(id,Btilde,sigmahat,Phi,Y,Z){
 
 #' (S)REEMforest alogorithm
 #'
-#' @param X :
-#' @param Y :
-#' @param id :
-#' @param Z :
-#' @param iter :
-#' @param mtry :
-#' @param ntree :
-#' @param time :
-#' @param sto :
-#' @param delta :
+#' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
+#' @param Y [vector]: A vector containing the output trajectories.
+#' @param id [vector]: Is the vector of the identifiers for the different trajectories.
+#' @param Z [matrix]: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.
+#' @param iter [numeric]: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}
+#' @param mtry [numeric]: Number of variables randomly sampled as candidates at each split. The default value is \code{p/3}.
+#' @param ntree [numeric]: Number of trees to grow. This should not be set to too small a number, to ensure that every input row gets predicted at least a few times. The default value is \code{ntree=500}.
+#' @param time [time]: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' @param sto [character]: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.
+#' @param delta [numeric]: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01
 #'
 #' @import stats
 #' @import randomForest
 #'
-#' @return
+#' @return A fitted (S)REEMforest model which is a list of the following elements: \itemize{
+#' \item \code{forest:} Random forest obtained at the last iteration.
+#' \item \code{random_effects :} Predictions of random effects for different trajectories.
+#' \item \code{id_btilde:} Identifiers of individuals associated with the predictions \code{random_effects}.
+#' \item \code{var_random_effects: } Estimation of the variance covariance matrix of random effects.
+#' \item \code{sigma_sto: } Estimation of the volatility parameter of the stochastic process.
+#' \item \code{sigma: } Estimation of the residual variance parameter.
+#' \item \code{time: } The vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' \item \code{sto: } Stochastic process used in the model.
+#' \item \code{Vraisemblance:} Log-likelihood of the different iterations.
+#' \item \code{id: } Vector of the identifiers for the different trajectories.
+#' \item \code{OOB: } OOB error of the fitted random forest at each iteration.
+#' }
 #' @export
 #'
-REEMforest <- function(X,Y,id,Z,iter,mtry,ntree, time, sto, delta = 0.001){
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+#' # Train a SREEMforest model on the generated data. Should take ~ 50 secondes
+#' # The data are generated with a Brownian motion
+#' #  so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
+#' SREEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+#' SREEMF$forest # is the fitted random forest (obtaind at the last iteration).
+#' SREEMF$random_effects are the predicted random effects for each individual.
+#' SREEMF$omega are the predicted stochastic processes.
+#' plot(SREEMF$Vraisemblance) #evolution of the log-likelihood.
+#' SREEMF$OOB # OOB error at each iteration.
+#' }
+#'
+REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.001){
   q <- dim(Z)[2]
   nind <- length(unique(id))
-  btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets al?atoires de l'individu i
+  btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets aléatoires de l'individu i
   sigmahat <- 1 #### init
   Btilde <- diag(rep(1,q)) ### init
   epsilonhat <- 0
@@ -800,21 +885,51 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 
 #' (S)MERT algorithm
 #'
-#' @param X :
-#' @param Y :
-#' @param id :
-#' @param Z :
-#' @param iter :
-#' @param time :
-#' @param sto :
-#' @param delta :
+#' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
+#' @param Y [vector]: A vector containing the output trajectories.
+#' @param id [vector]: Is the vector of the identifiers for the different trajectories.
+#' @param Z [matrix]: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.
+#' @param iter [numeric]: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}
+#' @param time [vector]: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' @param sto [character]: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.
+#' @param delta [numeric]: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01
+#'
 #'
 #' @import stats
 #' @import rpart
 #'
-#' @return
+#'
+#'
+#' @return A fitted (S)MERF model which is a list of the following elements: \itemize{
+#' \item \code{forest:} Tree obtained at the last iteration.
+#' \item \code{random_effects :} Predictions of random effects for different trajectories.
+#' \item \code{id_btilde:} Identifiers of individuals associated with the predictions \code{random_effects}.
+#' \item \code{var_random_effects: } Estimation of the variance covariance matrix of random effects.
+#' \item \code{sigma_sto: } Estimation of the volatility parameter of the stochastic process.
+#' \item \code{sigma: } Estimation of the residual variance parameter.
+#' \item \code{time: } The vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' \item \code{sto: } Stochastic process used in the model.
+#' \item \code{Vraisemblance:} Log-likelihood of the different iterations.
+#' \item \code{id: } Vector of the identifiers for the different trajectories.
+#' }
+#'
 #' @export
-MERT <- function(X,Y,id,Z,iter,time, sto, delta = 0.001){
+#'
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+#' # Train a SMERF model on the generated data. Should take ~ 50 secondes
+#' # The data are generated with a Brownian motion,
+#' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
+#' smert <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
+#' smert$forest # is the fitted random forest (obtaind at the last iteration).
+#' smert$random_effects are the predicted random effects for each individual.
+#' smert$omega are the predicted stochastic processes.
+#' plot(smerf$Vraisemblance) #evolution of the log-likelihood.
+#' }
+#'
+MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
   q <- dim(Z)[2]
   nind <- length(unique(id))
   btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets al?atoires de l'individu i
@@ -896,20 +1011,49 @@ MERT <- function(X,Y,id,Z,iter,time, sto, delta = 0.001){
 
 #' (S)REEMtree algorithm
 #'
-#' @param X :
-#' @param Y :
-#' @param id :
-#' @param Z :
-#' @param iter :
-#' @param time :
-#' @param sto :
-#' @param delta :
+#' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
+#' @param Y [vector]: A vector containing the output trajectories.
+#' @param id [vector]: Is the vector of the identifiers for the different trajectories.
+#' @param Z [matrix]: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.
+#' @param iter [numeric]: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}
+#' @param time [vector]: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' @param sto [character]: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.
+#' @param delta [numeric]: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01
+#'
 #'
 #' @import stats
 #' @import rpart
 #'
-#' @return
+#'
+#'
+#' @return A fitted (S)MERF model which is a list of the following elements: \itemize{
+#' \item \code{forest:} Tree obtained at the last iteration.
+#' \item \code{random_effects :} Predictions of random effects for different trajectories.
+#' \item \code{id_btilde:} Identifiers of individuals associated with the predictions \code{random_effects}.
+#' \item \code{var_random_effects: } Estimation of the variance covariance matrix of random effects.
+#' \item \code{sigma_sto: } Estimation of the volatility parameter of the stochastic process.
+#' \item \code{sigma: } Estimation of the residual variance parameter.
+#' \item \code{time: } The vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.
+#' \item \code{sto: } Stochastic process used in the model.
+#' \item \code{Vraisemblance:} Log-likelihood of the different iterations.
+#' \item \code{id: } Vector of the identifiers for the different trajectories.
+#' }
+#'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+#' # Train a SMERF model on the generated data. Should take ~ 50 secondes
+#' # The data are generated with a Brownian motion,
+#' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
+#' sreemt <- REEMtree(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
+#' sreemt$forest # is the fitted random forest (obtaind at the last iteration).
+#' sreemt$random_effects are the predicted random effects for each individual.
+#' sreemt$omega are the predicted stochastic processes.
+#' plot(sreemt$Vraisemblance) #evolution of the log-likelihood.
+#' }
 REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
   q <- dim(Z)[2]
   nind <- length(unique(id))
@@ -1038,171 +1182,6 @@ Moy_fbm <- function(id,Btilde,sigmahat,Phi,Y,Z, H, time, sigma2){
     S2 <- S2 + t(Phi[w,, drop=FALSE])%*%solve(V)%*%Y[w]
   }
   M <- solve(S1)%*%S2
-}
-
-g <- function(s,t) { 1/abs(s-t)}
-#### faire le mod?le lin?aire mixte stochastique ::::
-
-#' (S)LMEM algorithm
-#'
-#' @param X [matrix]:
-#' @param Y [vector]:
-#' @param id [vector]:
-#' @param Z [matrix]:
-#' @param iter [numeric]:
-#' @param time [vector]:
-#' @param sto [numeric]:
-#' @param delta [numeric]:
-#'
-#' @import stats
-#'
-#' @return
-#' @export
-Linmix <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
-  q <- dim(Z)[2]
-  nind <- length(unique(id))
-  btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets al?atoires de l'individu i
-  sigmahat <- 1 #### init
-  if (q==1) Btilde <- 1
-  if (q>1) Btilde <- diag(rep(1,q)) ### init
-  epsilonhat <- 0
-  id_btilde <- unique(id)
-  Tiime <- sort(unique(time))
-  omega <- rep(0,length(Y))
-  sigma2 <- 1
-  inc <- 1
-  Vrai <- NULL
-
-  if (class(sto)=="character"){
-    if ( sto=="none"){
-      for (i in 1:iter){
-        ystar <- rep(0,length(Y))
-        for (k in 1:nind){ #### on retrace les effets al?atoires
-          indiv <- which(id==unique(id)[k])
-          ystar[indiv] <- Y[indiv]- Z[indiv,, drop=FALSE]%*%btilde[k,]
-        }
-
-        beta <- Moy(id,Btilde,sigmahat,X,Y,Z) ### fit des feuilles
-        fhat <- X%*%beta
-        for (k in 1:nind){ ### calcul des effets al?atoires par individu
-          indiv <- which(id==unique(id)[k])
-          V <- Z[indiv,, drop=FALSE]%*%Btilde%*%t(Z[indiv,, drop=FALSE])+diag(as.numeric(sigmahat),length(indiv),length(indiv))
-          btilde[k,] <- Btilde%*%t(Z[indiv,,drop=FALSE])%*%solve(V)%*%(Y[indiv]-fhat[indiv])
-        }
-
-        for (k in 1:nind){
-          indiv <- which(id==unique(id)[k])
-          epsilonhat[indiv] <- Y[indiv] -fhat[indiv] -Z[indiv,, drop=FALSE]%*%btilde[k,]
-        }
-        sigm <- sigmahat
-        sigmahat <- sig(sigmahat,id, Z, epsilonhat, Btilde) ##### MAJ de la variance des erreurs ! ici que doit se trouver le probl?me !
-        Btilde  <- bay(btilde,Btilde,Z,id,sigm) #### MAJ des param?tres de la variance des effets al?atoires.
-
-      }
-      return(list(beta=beta,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto))
-    }
-  }
-  for (i in 1:iter){
-    ystar <- rep(0,length(Y))
-    for (k in 1:nind){ #### on retrace les effets al?atoires
-      indiv <- which(id==unique(id)[k])
-      ystar[indiv] <- Y[indiv]- Z[indiv,, drop=FALSE]%*%btilde[k,]- omega[indiv]
-    }
-
-
-    beta <- Moy_sto(id,Btilde,sigmahat,X,Y,Z,sto,time,sigma2) ### fit des feuilles
-    fhat <- X%*%beta
-    for (k in 1:nind){
-      indiv <- which(id==unique(id)[k])
-      K <- sto_analysis(sto,time[indiv])
-      V <- Z[indiv,, drop=FALSE]%*%Btilde%*%t(Z[indiv,, drop=FALSE])+diag(as.numeric(sigmahat),length(indiv),length(indiv))+ sigma2*K
-      btilde[k,] <- Btilde%*%t(Z[indiv,, drop=FALSE])%*%solve(V)%*%(Y[indiv]-fhat[indiv])
-    }
-    #### pr?diction du processus stochastique:
-    for (k in 1:length(unique(id))){
-      indiv <- which(id==unique(id)[k])
-      K <- sto_analysis(sto,time[indiv])
-      V <- Z[indiv,, drop=FALSE]%*%Btilde%*%t(Z[indiv,, drop=FALSE])+diag(as.numeric(sigmahat),length(indiv),length(indiv))+sigma2*K
-      omega[indiv] <- sigma2*K%*%solve(V)%*%(Y[indiv]-fhat[indiv])
-    }
-
-    for (k in 1:nind){
-      indiv <- which(id==unique(id)[k])
-      epsilonhat[indiv] <- Y[indiv] -fhat[indiv] -Z[indiv,, drop=FALSE]%*%btilde[k,]- omega[indiv]
-    }
-    sigm <- sigmahat
-    B <- Btilde
-    sigmahat <- sig_sto(sigmahat,id, Z, epsilonhat, Btilde, time, sigma2,sto) ##### MAJ de la variance des erreurs ! ici que doit se trouver le probl?me !
-    Btilde  <- bay_sto(btilde,Btilde,Z,id,sigm, time, sigma2,sto) #### MAJ des param?tres de la variance des effets al?atoires.
-    sigma2 <- gam_sto(sigm,id,Z,B,time,sigma2,sto,omega)
-    Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
-    if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
-    if (inc< delta) {
-      print(cat("stopped after", i, "iterations."))
-      return(list(beta=beta,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = Tiime, sto= sto,Vraisemblance=Vrai))
-    }
-  }
-  return(list(beta=beta,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = Tiime, sto= sto, Vraisemblance=Vrai))
-}
-
-
-#' Predict a fitted (S)LMEM algorithm
-#'
-#' @param lin :
-#' @param X :
-#' @param Z :
-#' @param id :
-#' @param time :
-#'
-#' @import stats
-#'
-#' @return
-#' @export
-#'
-predict_lin <- function(lin, X,Z,id,time){
-  n <- length(unique(id))
-  Y <- rep(0,length(id))
-  id_btilde <- lin$id_btilde
-  f <- X%*%lin$beta
-  Time <- lin$time
-  id_btilde <- lin$id_btilde
-  Ypred <- rep(0,length(id))
-  if (lin$sto=="none"){
-    for (i in 1:length(unique(id))){
-      w <- which(id==unique(id)[i])
-      k <- which(id_btilde==unique(id)[i])
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%lin$random_effects[k,]
-    }
-    return(Ypred)
-  }
-
-  if (lin$sto=="exp"){
-    for (i in 1:length(unique(id))){
-      w <- which(id==unique(id)[i])
-      k <- which(id_btilde==unique(id)[i])
-      om <- which(lin$id_omega[k,]==1)
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%lin$random_effects[k,] + predict.exp(lin$omega[k,om],Time[om],time[w], lin$alpha)
-    }
-    return(Ypred)
-  }
-
-  if (lin$sto=="fbm"){
-    for (i in 1:length(unique(id))){
-      w <- which(id==unique(id)[i])
-      k <- which(id_btilde==unique(id)[i])
-      om <- which(lin$id_omega[k,]==1)
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%lin$random_effects[k,] + predict.fbm(lin$omega[k,om],Time[om],time[w], lin$Hurst)
-    }
-    return(Ypred)
-  }
-
-  for (i in 1:length(unique(id))){
-    w <- which(id==unique(id)[i])
-    k <- which(id_btilde==unique(id)[i])
-    om <- which(lin$id_omega[k,]==1)
-    Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%lin$random_effects[k,] + predict.sto(lin$omega[k,om],Time[om],time[w], lin$sto)
-  }
-  return(Ypred)
 }
 
 #' Title
@@ -1758,3 +1737,100 @@ logV.exp <- function(Y, fhat, Z, time, id, B, sigma2,sigmahat,H){
   }
   return(-logl)
 }
+
+
+
+#' Longitudinal data generator
+#'
+#' @param n [numeric]: Number of individuals. The default value is \code{n=50}.
+#' @param p [numeric]: Number of predictors. The default value is \code{p=10}.
+#' @param G [numeric]: Number of groups of predictors. Default value is \code{G=6}
+#'
+#' @import mvtnorm
+#'
+#' @return a list of the following elements: \itemize{
+#' \item \code{Y:} vector of the output trajectories.
+#' \item \code{X :} matrix of the fixed-effects predictors.
+#' \item \code{Z:} matrix of the random-effects predictors.
+#' \item \code{id: } vector of the identifiers for each individual.
+#' \item \code{time: } vector the the time measurements for each individual.
+#' }
+#'
+#' @export
+#'
+#' @examples
+DataLongGenerator <- function(n=50,p=10,G=10){
+
+  mes <-floor(4*runif(n)+8)
+  time <- NULL
+  id <- NULL
+  nb2 <- c(1:n)
+  for (i in 1:n){
+    time <- c(time, seq(1,mes[i], by=1))
+    id <- c(id, rep(nb2[i], length(seq(1,mes[i], by=1))))
+  }
+
+  bruit <- floor(0*p)
+  bruit <- bruit+ (p-bruit)%%G
+  nices <- NULL
+  for (i in 1:G){
+    nices <- c(nices,rep(i,(p-bruit)/G))
+  }
+
+  comportements <- matrix(0,length(time),G)
+  comportements[,1] <- 2.44+0.04*(time-((time-6)^2)/(time/3))
+  comportements[,2] <- 0.5*time-0.1*(time-5)^2
+  comportements[,3] <- 0.25*time-0.05*(time-6)^2
+  comportements[,4] <- cos((time-1)/3)
+  comportements[,5] <- 0.1*time + sin(0.6*time+1.3)
+  comportements[,6] <- -0.1*time^2
+
+
+  X <- matrix(0,length(time), p)
+  for (i in 1:(p-bruit)){
+    X[,i] <- comportements[,nices[i]] + rnorm(length(time),0 ,0.2)
+  }
+
+  for (j in 1:n){
+    w <- which(id==j)
+    X[w,1:(p-bruit)] <- X[w,1:(p-bruit)] + rnorm(1,0,0.1)
+  }
+
+  for (i in (p-bruit):p){
+    X[,i] <- rnorm(length(time),0, 3)
+  }
+
+  f <- 1.3*X[,1]^2 + 2*sqrt(abs(X[,which(nices==2)[1]]))
+
+  sigma <- cbind(c(0.5,0.6),c(0.6,3))
+  Btilde<- matrix(0,length(unique(id)),2)
+  for (i in 1:length(unique(id))){
+    Btilde[i,] <- rmvnorm(1, mean=rep(0,2),sigma=sigma)
+  }
+
+  Z <- as.matrix(cbind(rep(1,length(f)),2*runif(length(f))))
+
+  effets  <- NULL
+  for (i in 1:length(unique(id))){
+    w <- which(id==unique(id)[i])
+    effets <- c(effets, Z[w,, drop=FALSE]%*%Btilde[i,])
+  }
+  ##### simulation de mouvemments brownien
+  gam <- 0.8
+  BM <- NULL
+  m <- length(unique(id))
+  for (i in 1:m){
+    w <- which(id==unique(id)[i])
+    W <- rep(0,length(w))
+    t <- time[w]
+    for (j in 2:length(w)){
+      W[j] <- W[j-1]+sqrt(gam*(t[j]-t[j-1]))*rnorm(1,0,1)
+    }
+    BM <- c(BM,W)
+  }
+
+  sigma2 <- 0.5
+  Y <- f + effets +rnorm(length(f),0,sigma2)+BM
+  return(list(Y=Y,X=X,Z=Z,id=id, time=time))
+}
+

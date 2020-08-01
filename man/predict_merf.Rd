@@ -7,19 +7,50 @@
 predict_merf(merf_sto, X, Z, id, time)
 }
 \arguments{
-\item{merf_sto}{:}
+\item{merf_sto}{: output of (S)MERF; (S)REEMforest; (S)MERT or (S)REEMtree function.}
 
-\item{X}{:}
+\item{X}{\link{matrix}: matrix of the fixed effects for the new observations to be predicted.}
 
-\item{Z}{:}
+\item{Z}{\link{matrix}: matrix of the random effects for the new observations to be predicted.}
 
-\item{id}{:}
+\item{id}{\link{vector}: vector of the identifiers of the new observations to be predicted.}
 
-\item{time}{:}
+\item{time}{\link{vector}: vector of the time measurements of the new observations to be predicted.}
 }
 \value{
-
+vector of the predicted output for the new observations.
 }
 \description{
 Predict with a (S)MERF alorithm
+}
+\examples{
+\dontrun{
+set.seed(123)
+data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
+REEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+# Then we predict on the learning sample :
+pred.REEMF <- predict_merf(REEMF, X=data$X,Z=data$Z,id=data$id, time=data$time)
+# Let's have a look at the predictions
+# the predictions are in red while the real output trajectories are in blue:
+par(mfrow=c(4,5),mar=c(2,2,2,2))
+for (i in unique(data$id)){
+  w <- which(data$id==i)
+  plot(data$time[w],data$Y[w],type="l",col="blue")
+  lines(data$time[w],pred.REEMF[w], col="red")
+}
+# Train error :
+mean((pred.REEMF-data$Y)^2)
+
+# The same function can be used with a fitted SMERF model:
+smerf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
+pred.smerf <- predict_merf(smerf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+# Train error :
+mean((pred.smerf-data$Y)^2)
+# This function can be used even on a MERF model (when no stochastic process is specified)
+merf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="none")
+pred.merf <- predict_merf(merf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+# Train error :
+mean((pred.merf-data$Y)^2)
+
+}
 }
