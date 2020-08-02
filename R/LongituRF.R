@@ -757,7 +757,7 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         if (inc< delta) {
           print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
-          class(sortie) <- "LongituRF"
+          class(sortie) <- "longituRF"
           return(sortie)
         }
       }
