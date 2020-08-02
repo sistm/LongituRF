@@ -4,14 +4,14 @@
 \alias{DataLongGenerator}
 \title{Longitudinal data generator}
 \usage{
-DataLongGenerator(n = 50, p = 10, G = 10)
+DataLongGenerator(n = 50, p = 6, G = 6)
 }
 \arguments{
 \item{n}{\link{numeric}: Number of individuals. The default value is \code{n=50}.}
 
-\item{p}{\link{numeric}: Number of predictors. The default value is \code{p=10}.}
+\item{p}{\link{numeric}: Number of predictors. The default value is \code{p=6}.}
 
-\item{G}{\link{numeric}: Number of groups of predictors. Default value is \code{G=6}}
+\item{G}{\link{numeric}: Number of groups of predictors with temporal behavior, generates \code{p-G} input variables with no temporal behavior.}
 }
 \value{
 a list of the following elements: \itemize{
@@ -23,5 +23,40 @@ a list of the following elements: \itemize{
 }
 }
 \description{
-Longitudinal data generator
+Simulate longitudinal data according to the semi-parametric stochastic mixed-effects model given by: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+\eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is a Brownian motion with volatility \eqn{\gamma^2=0.8} at time \eqn{t} for the \eqn{i}th individual; \eqn{\epsilon_i} is the residual error with
+variance \eqn{\sigma^2=0.5}.
+The data are simulated according to the simulations in low dimensional in the low dimensional scheme of the paper \url{https://arxiv.org/pdf/1901.11279.pdf}
+}
+\examples{
+\dontrun{
+data <- DataLongGenerator(n=17, p=6,G=6) # Generate the data
+
+# Let's see the output :
+w <- which(data$id==1)
+plot(data$time[w],data$Y[w],type="l",ylim=c(min(data$Y),max(data$Y)), col="grey")
+for (i in unique(data$id)){
+  w <- which(data$id==i)
+  lines(data$time[w],data$Y[w], col='grey')
+}
+# Let's see the fixed effects predictors (need ggplot2):
+library(ggplot2)
+Inputs <- NULL
+for (i in 1:6){
+  Inputs <- rbind(Inputs,cbind(data$X[,i], data$id, data$time, rep(i,length(data$id))))
+}
+
+Inputs <- as.data.frame(Inputs)
+names(Inputs)<- c("traj","id","time","variable")
+Inputs$id <- factor(Inputs$id, levels=sort(unique(Inputs$id)))
+
+compX <- ggplot(data = Inputs, aes(x=time, y=traj, group=id))+ theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+   panel.grid.major = element_blank())+geom_line(aes(col=id)) +
+  facet_wrap(~variable, labeller = label_bquote(X ^ (.(variable))),
+  scales="free")+ylab("")+guides(color=FALSE)
+
+compX
+}
 }
