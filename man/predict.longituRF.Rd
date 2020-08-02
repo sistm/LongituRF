@@ -9,13 +9,13 @@
 \arguments{
 \item{object}{: a \code{longituRF} output of (S)MERF; (S)REEMforest; (S)MERT or (S)REEMtree function.}
 
-\item{X}{\link{matrix}: matrix of the fixed effects for the new observations to be predicted.}
+\item{X}{[matrix]: matrix of the fixed effects for the new observations to be predicted.}
 
-\item{Z}{\link{matrix}: matrix of the random effects for the new observations to be predicted.}
+\item{Z}{[matrix]: matrix of the random effects for the new observations to be predicted.}
 
-\item{id}{\link{vector}: vector of the identifiers of the new observations to be predicted.}
+\item{id}{[vector]: vector of the identifiers of the new observations to be predicted.}
 
-\item{time}{\link{vector}: vector of the time measurements of the new observations to be predicted.}
+\item{time}{[vector]: vector of the time measurements of the new observations to be predicted.}
 
 \item{...}{: low levels arguments.}
 }

@@ -7,21 +7,21 @@
 MERT(X, Y, id, Z, iter = 100, time, sto, delta = 0.001)
 }
 \arguments{
-\item{X}{\link{matrix}: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.}
+\item{X}{[matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.}
 
-\item{Y}{\link{vector}: A vector containing the output trajectories.}
+\item{Y}{[vector]: A vector containing the output trajectories.}
 
-\item{id}{\link{vector}: Is the vector of the identifiers for the different trajectories.}
+\item{id}{[vector]: Is the vector of the identifiers for the different trajectories.}
 
-\item{Z}{\link{matrix}: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.}
+\item{Z}{[matrix]: A \code{N}x\code{q} matrix containing the \code{q} predictor of the random effects.}
 
-\item{iter}{\link{numeric}: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}}
+\item{iter}{[numeric]: Maximal number of iterations of the algorithm. The default is set to \code{iter=100}}
 
-\item{time}{\link{vector}: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.}
+\item{time}{[vector]: Is the vector of the measurement times associated with the trajectories in \code{Y},\code{Z} and \code{X}.}
 
-\item{sto}{\link{character}: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.}
+\item{sto}{[character]: Defines the covariance function of the stochastic process, can be either \code{"none"} for no stochastic process, \code{"BM"} for Brownian motion, \code{OrnUhl} for standard Ornstein-Uhlenbeck process, \code{BBridge} for Brownian Bridge, \code{fbm} for Fractional Brownian motion; can also be a function defined by the user.}
 
-\item{delta}{\link{numeric}: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01}
+\item{delta}{[numeric]: The algorithm stops when the difference in log likelihood between two iterations is smaller than \code{delta}. The default value is set to O.O01}
 }
 \value{
 A fitted (S)MERF model which is a list of the following elements: \itemize{
@@ -43,7 +43,7 @@ The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pd
 The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
-which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
+ which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
 }
 \examples{
 \dontrun{
@@ -53,9 +53,9 @@ data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals
 # The data are generated with a Brownian motion,
 # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 smert <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
-smert$forest # is the fitted random forest (obtaind at the last iteration).
-smert$random_effects are the predicted random effects for each individual.
-smert$omega are the predicted stochastic processes.
+smert$forest # is the fitted random forest (obtained at the last iteration).
+smert$random_effects # are the predicted random effects for each individual.
+smert$omega # are the predicted stochastic processes.
 plot(smerf$Vraisemblance) #evolution of the log-likelihood.
 }
 

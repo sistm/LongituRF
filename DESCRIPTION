@@ -1,5 +1,5 @@
 Package: LongituRF
-Title: What the Package Does (One Line, Title Case)
+Title: Random forests for longitudinal data
 Version: 0.9
 Authors@R: person(given = "Louis",
            family = "Capitaine",
@@ -10,6 +10,5 @@ License: GPL-2
 Imports: stats, randomForest, rpart, mvtnorm
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: testthat

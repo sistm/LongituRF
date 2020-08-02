@@ -7,11 +7,11 @@
 DataLongGenerator(n = 50, p = 6, G = 6)
 }
 \arguments{
-\item{n}{\link{numeric}: Number of individuals. The default value is \code{n=50}.}
+\item{n}{[numeric]: Number of individuals. The default value is \code{n=50}.}
 
-\item{p}{\link{numeric}: Number of predictors. The default value is \code{p=6}.}
+\item{p}{[numeric]: Number of predictors. The default value is \code{p=6}.}
 
-\item{G}{\link{numeric}: Number of groups of predictors with temporal behavior, generates \code{p-G} input variables with no temporal behavior.}
+\item{G}{[numeric]: Number of groups of predictors with temporal behavior, generates \code{p-G} input variables with no temporal behavior.}
 }
 \value{
 a list of the following elements: \itemize{

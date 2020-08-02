@@ -33,6 +33,7 @@
 #' \item \code{id: } Vector of the identifiers for the different trajectories.
 #' \item \code{OOB: } OOB error of the fitted random forest at each iteration.
 #' }
+#'
 #' @export
 #'
 #' @examples
@@ -43,10 +44,10 @@
 #' # The data are generated with a Brownian motion,
 #' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 #' smerf <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
-#' smerf$forest # is the fitted random forest (obtaind at the last iteration).
-#' smerf$random_effects are the predicted random effects for each individual.
-#' smerf$omega are the predicted stochastic processes.
-#' plot(smerf$Vraisemblance) #evolution of the log-likelihood.
+#' smerf$forest # is the fitted random forest (obtained at the last iteration).
+#' smerf$random_effects # are the predicted random effects for each individual.
+#' smerf$omega # are the predicted stochastic processes.
+#' plot(smerf$Vraisemblance) # evolution of the log-likelihood.
 #' smerf$OOB # OOB error at each iteration.
 #' }
 #'
@@ -108,7 +109,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai, logV.fbm(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,h))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,sigma_sto=sigma2, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
           class(sortie)<-"longituRF"
           return(sortie)
@@ -162,7 +163,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai,logV.exp(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,alpha))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, alpha = alpha, OOB =OOB, omega=omega2)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -197,7 +198,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai, logV(Y,fhat,Z,time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <-abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc < delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, OOB =OOB)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -234,7 +235,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
     if (inc < delta) {
-      print(cat("stopped after", i, "iterations."))
+      print(paste0("stopped after", i, "iterations."))
       sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)
       class(sortie) <- "longituRF"
       return(sortie)
@@ -666,9 +667,9 @@ Moy <- function(id,Btilde,sigmahat,Phi,Y,Z){
 #' # The data are generated with a Brownian motion
 #' #  so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 #' SREEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
-#' SREEMF$forest # is the fitted random forest (obtaind at the last iteration).
-#' SREEMF$random_effects are the predicted random effects for each individual.
-#' SREEMF$omega are the predicted stochastic processes.
+#' SREEMF$forest # is the fitted random forest (obtained at the last iteration).
+#' SREEMF$random_effects # are the predicted random effects for each individual.
+#' SREEMF$omega # are the predicted stochastic processes.
 #' plot(SREEMF$Vraisemblance) #evolution of the log-likelihood.
 #' SREEMF$OOB # OOB error at each iteration.
 #' }
@@ -754,8 +755,10 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         Vrai <- c(Vrai, logV.fbm(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,h))
         if (i>1) inc <- abs(Vrai[i-1]-Vrai[i])/abs(Vrai[i-1])
         if (inc< delta) {
-          print(cat("stopped after", i, "iterations."))
-          return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2))
+          print(paste0("stopped after", i, "iterations."))
+          sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
+          class(sortie) <- "LongituRF"
+          return(sortie)
         }
       }
       sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto=sto,omega=omega2, sigma_sto =sigma2, time =time, sto= sto, Hurst =h, Vraisemblance=Vrai, OOB =OOB)
@@ -810,7 +813,7 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         Vrai <- c(Vrai, logV(Y,fhat,Z,time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc< delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, OOB =OOB)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -874,7 +877,7 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
     if (Vrai[i]<Vrai[i-1]) {reemfouille <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)}
     }
     if (inc< delta) {
-      print(cat("stopped after", i, "iterations."))
+      print(paste0("stopped after", i, "iterations."))
       return(reemfouille)
     }
   }
@@ -969,9 +972,9 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 #' # The data are generated with a Brownian motion,
 #' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 #' smert <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
-#' smert$forest # is the fitted random forest (obtaind at the last iteration).
-#' smert$random_effects are the predicted random effects for each individual.
-#' smert$omega are the predicted stochastic processes.
+#' smert$forest # is the fitted random forest (obtained at the last iteration).
+#' smert$random_effects # are the predicted random effects for each individual.
+#' smert$omega # are the predicted stochastic processes.
 #' plot(smerf$Vraisemblance) #evolution of the log-likelihood.
 #' }
 #'
@@ -1013,7 +1016,7 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
         Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,0,sigmahat,"none"))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc< delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance = Vrai, id =id, time=time)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -1051,7 +1054,7 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
-      print(cat("stopped after", i, "iterations."))
+      print(paste0("stopped after", i, "iterations."))
       sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,id_omega=id_omega, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai, id = id)
       class(sortie) <- "longituRF"
       return(sortie)
@@ -1110,9 +1113,9 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
 #' # The data are generated with a Brownian motion,
 #' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 #' sreemt <- REEMtree(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
-#' sreemt$forest # is the fitted random forest (obtaind at the last iteration).
-#' sreemt$random_effects are the predicted random effects for each individual.
-#' sreemt$omega are the predicted stochastic processes.
+#' sreemt$forest # is the fitted random forest (obtained at the last iteration).
+#' sreemt$random_effects # are the predicted random effects for each individual.
+#' sreemt$omega # are the predicted stochastic processes.
 #' plot(sreemt$Vraisemblance) #evolution of the log-likelihood.
 #' }
 REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
@@ -1169,7 +1172,7 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
         Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc <  delta) {
-          print(cat("stopped after", i, "iterations."))
+          print(paste0("stopped after", i, "iterations."))
           sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -1222,7 +1225,7 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
-      print(cat("stopped after", i, "iterations."))
+      print(paste0("stopped after", i, "iterations."))
       sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega, omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id)
       class(sortie) <- "longituRF"
       return(sortie)
