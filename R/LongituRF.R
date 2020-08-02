@@ -1,5 +1,12 @@
 #' (S)MERF algorithm
 #'
+#' (S)MERF is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2014 \url{https://www.tandfonline.com/doi/abs/10.1080/00949655.2012.741599}).
+#' The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+#' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+#' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+#' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+#'  which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
+#'
 #' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
 #' @param Y [vector]: A vector containing the output trajectories.
 #' @param id [vector]: Is the vector of the identifiers for the different trajectories.
@@ -102,10 +109,14 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,sigma_sto=sigma2, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2))
+          sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,sigma_sto=sigma2, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
+          class(sortie)<-"longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),sigma_sto=sigma2,omega=omega2, sigma_sto =sigma2, time = time, sto= sto, Hurst =h, id=id, Vraisemblance=Vrai, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),sigma_sto=sigma2,omega=omega2, sigma_sto =sigma2, time = time, sto= sto, Hurst =h, id=id, Vraisemblance=Vrai, OOB =OOB)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
 
 
@@ -152,10 +163,14 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, alpha = alpha, OOB =OOB, omega=omega2))
+          sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, alpha = alpha, OOB =OOB, omega=omega2)
+          class(sortie) <- "longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega2, sigma_sto =sigma2, time = time, sto= sto, alpha=alpha, id=id, Vraisemblance=Vrai, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega2, sigma_sto =sigma2, time = time, sto= sto, alpha=alpha, id=id, Vraisemblance=Vrai, OOB =OOB)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
 
     if ( sto=="none"){
@@ -183,10 +198,14 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         if (i>1) inc <-abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc < delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, OOB =OOB))
+          sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, OOB =OOB)
+          class(sortie) <- "longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance=Vrai,id=id, time=time, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance=Vrai,id=id, time=time, OOB =OOB)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
   for (i in 1:iter){
@@ -216,10 +235,14 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
     if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
     if (inc < delta) {
       print(cat("stopped after", i, "iterations."))
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
-  return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB))
+  sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)
+  class(sortie) <- "longituRF"
+  return(sortie)
 }
 
 #' Title
@@ -282,13 +305,14 @@ gam_sto <- function(sigma,id,Z, Btilde, time, sigma2,sto, omega){
 }
 
 
-#' Predict with a (S)MERF alorithm
+#' Predict with longitudinal trees and random forests.
 #'
-#' @param merf_sto : output of (S)MERF; (S)REEMforest; (S)MERT or (S)REEMtree function.
+#' @param object : a \code{longituRF} output of (S)MERF; (S)REEMforest; (S)MERT or (S)REEMtree function.
 #' @param X [matrix]: matrix of the fixed effects for the new observations to be predicted.
 #' @param Z [matrix]: matrix of the random effects for the new observations to be predicted.
 #' @param id [vector]: vector of the identifiers of the new observations to be predicted.
 #' @param time [vector]: vector of the time measurements of the new observations to be predicted.
+#' @param ... : low levels arguments.
 #'
 #' @import stats
 #' @import randomForest
@@ -302,7 +326,7 @@ gam_sto <- function(sigma,id,Z, Btilde, time, sigma2,sto, omega){
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 #' REEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
 #' # Then we predict on the learning sample :
-#' pred.REEMF <- predict_merf(REEMF, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' pred.REEMF <- predict(REEMF, X=data$X,Z=data$Z,id=data$id, time=data$time)
 #' # Let's have a look at the predictions
 #' # the predictions are in red while the real output trajectories are in blue:
 #' par(mfrow=c(4,5),mar=c(2,2,2,2))
@@ -316,49 +340,49 @@ gam_sto <- function(sigma,id,Z, Btilde, time, sigma2,sto, omega){
 #'
 #' # The same function can be used with a fitted SMERF model:
 #' smerf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
-#' pred.smerf <- predict_merf(smerf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' pred.smerf <- predict(smerf, X=data$X,Z=data$Z,id=data$id, time=data$time)
 #' # Train error :
 #' mean((pred.smerf-data$Y)^2)
 #' # This function can be used even on a MERF model (when no stochastic process is specified)
 #' merf <-MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="none")
-#' pred.merf <- predict_merf(merf, X=data$X,Z=data$Z,id=data$id, time=data$time)
+#' pred.merf <- predict(merf, X=data$X,Z=data$Z,id=data$id, time=data$time)
 #' # Train error :
 #' mean((pred.merf-data$Y)^2)
 #'
 #' }
-predict_merf <- function(merf_sto, X,Z,id,time){
+predict.longituRF <- function(object, X,Z,id,time,...){
   n <- length(unique(id))
-  id_btilde <- merf_sto$id_btilde
-  f <- predict(merf_sto$forest,X)
-  Time <- merf_sto$time
-  id_btilde <- merf_sto$id_btilde
+  id_btilde <- object$id_btilde
+  f <- predict(object$forest,X)
+  Time <- object$time
+  id_btilde <- object$id_btilde
   Ypred <- rep(0,length(id))
-  id.app=merf_sto$id
-  if (merf_sto$sto=="none"){
+  id.app=object$id
+  if (object$sto=="none"){
     for (i in 1:length(unique(id))){
       w <- which(id==unique(id)[i])
       k <- which(id_btilde==unique(id)[i])
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%merf_sto$random_effects[k,]
+      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%object$random_effects[k,]
     }
     return(Ypred)
   }
 
-  if (merf_sto$sto=="exp"){
+  if (object$sto=="exp"){
     for (i in 1:length(unique(id))){
       w <- which(id==unique(id)[i])
       k <- which(id_btilde==unique(id)[i])
       om <- which(id.app==unique(id)[i])
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%merf_sto$random_effects[k,] + predict.exp(merf_sto$omega[om],Time[om],time[w], merf_sto$alpha)
+      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%object$random_effects[k,] + predict.exp(object$omega[om],Time[om],time[w], object$alpha)
     }
     return(Ypred)
   }
 
-  if (merf_sto$sto=="fbm"){
+  if (object$sto=="fbm"){
     for (i in 1:length(unique(id))){
       w <- which(id==unique(id)[i])
       k <- which(id_btilde==unique(id)[i])
       om <- which(id.app==unique(id)[i])
-      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%merf_sto$random_effects[k,] + predict.fbm(merf_sto$omega[om],Time[om],time[w], merf_sto$Hurst)
+      Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%object$random_effects[k,] + predict.fbm(object$omega[om],Time[om],time[w], object$Hurst)
     }
     return(Ypred)
   }
@@ -367,7 +391,7 @@ predict_merf <- function(merf_sto, X,Z,id,time){
     w <- which(id==unique(id)[i])
     k <- which(id_btilde==unique(id)[i])
     om <- which(id.app==unique(id)[i])
-    Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%merf_sto$random_effects[k,] + predict.sto(merf_sto$omega[om],Time[om],time[w], merf_sto$sto)
+    Ypred[w] <- f[w] + Z[w,, drop=FALSE]%*%object$random_effects[k,] + predict.sto(object$omega[om],Time[om],time[w], object$sto)
   }
   return(Ypred)
 }
@@ -596,7 +620,14 @@ Moy <- function(id,Btilde,sigmahat,Phi,Y,Z){
 }
 
 
-#' (S)REEMforest alogorithm
+#' (S)REEMforest algorithm
+#'
+#' (S)REEMforest is an adaptation of the random forest regression method to longitudinal data introduced by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}).
+#' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+#' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+#' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+#'  which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
+#'
 #'
 #' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
 #' @param Y [vector]: A vector containing the output trajectories.
@@ -727,7 +758,9 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
           return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2))
         }
       }
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto=sto,omega=omega2, sigma_sto =sigma2, time =time, sto= sto, Hurst =h, Vraisemblance=Vrai, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto=sto,omega=omega2, sigma_sto =sigma2, time =time, sto= sto, Hurst =h, Vraisemblance=Vrai, OOB =OOB)
+      class(sortie ) <- "longituRF"
+      return(sortie)
     }
 
     if ( sto=="none"){
@@ -778,10 +811,14 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc< delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, OOB =OOB))
+          sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, OOB =OOB)
+          class(sortie) <- "longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, id = id , time = time , Vraisemblance=Vrai, OOB =OOB))
+      sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, id = id , time = time , Vraisemblance=Vrai, OOB =OOB)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
   for (i in 1:iter){
@@ -841,7 +878,9 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
       return(reemfouille)
     }
   }
-  return(list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto, id=id, OOB =OOB, Vraisemblance=Vrai))
+  sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto, id=id, OOB =OOB, Vraisemblance=Vrai)
+  class(sortie) <- "longituRF"
+  return(sortie)
 }
 
 #' Title
@@ -884,6 +923,13 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 
 
 #' (S)MERT algorithm
+#'
+#' (S)MERT is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2011 \url{https://www.sciencedirect.com/science/article/abs/pii/S0167715210003433}).
+#' The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+#' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+#' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+#' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+#'  which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
 #'
 #' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
 #' @param Y [vector]: A vector containing the output trajectories.
@@ -968,10 +1014,14 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc< delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance = Vrai, id =id, time=time))
+          sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance = Vrai, id =id, time=time)
+          class(sortie) <- "longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance=Vrai, id=id, time=time))
+      sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance=Vrai, id=id, time=time)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
   for (i in 1:iter){
@@ -1002,14 +1052,25 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
       print(cat("stopped after", i, "iterations."))
-      return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,id_omega=id_omega, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai, id = id))
+      sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,id_omega=id_omega, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai, id = id)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
-  return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),id_omega=id_omega,omega=omega, sigma_sto =sigma2, time = time, sto= sto, Vraisemblance=Vrai, id=id))
+  sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id),id_omega=id_omega,omega=omega, sigma_sto =sigma2, time = time, sto= sto, Vraisemblance=Vrai, id=id)
+  class(sortie) <- "longituRF"
+  return(sortie)
 }
 
 
 #' (S)REEMtree algorithm
+#'
+#' (S)REEMtree is an adaptation of the random forest regression method to longitudinal data introduced by Sela and Simonoff. (2012 \url{https://link.springer.com/article/10.1007/s10994-011-5258-3}).
+#' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+#' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+#' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+#'  which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
+#'
 #'
 #' @param X [matrix]: A \code{N}x\code{p} matrix containing the \code{p} predictors of the fixed effects, column codes for a predictor.
 #' @param Y [vector]: A vector containing the output trajectories.
@@ -1109,10 +1170,14 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc <  delta) {
           print(cat("stopped after", i, "iterations."))
-          return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time))
+          sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time)
+          class(sortie) <- "longituRF"
+          return(sortie)
         }
       }
-      return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance=Vrai, time =time, id=id ))
+      sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance=Vrai, time =time, id=id )
+      class(sortie) <- 'longituRF'
+      return(sortie)
     }
   }
   for (i in 1:iter){
@@ -1158,10 +1223,14 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
       print(cat("stopped after", i, "iterations."))
-      return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega, omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id))
+      sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega, omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id)
+      class(sortie) <- "longituRF"
+      return(sortie)
     }
   }
-  return(list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega,omega=omega, sigma_sto =sigma2, time = time, sto= sto, Vraisemblance=Vrai, id=id))
+  sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega,omega=omega, sigma_sto =sigma2, time = time, sto= sto, Vraisemblance=Vrai, id=id)
+  class(sortie) <- "longituRF"
+  return(sortie)
 }
 
 #' Title

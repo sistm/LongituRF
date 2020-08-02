@@ -38,7 +38,11 @@ A fitted (S)MERF model which is a list of the following elements: \itemize{
 }
 }
 \description{
-(S)REEMtree algorithm
+(S)REEMtree is an adaptation of the random forest regression method to longitudinal data introduced by Sela and Simonoff. (2012 \url{https://link.springer.com/article/10.1007/s10994-011-5258-3}).
+The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+\eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
 }
 \examples{
 \dontrun{
@@ -47,10 +51,10 @@ data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals
 # Train a SMERF model on the generated data. Should take ~ 50 secondes
 # The data are generated with a Brownian motion,
 # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
-smert <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
-smert$forest # is the fitted random forest (obtaind at the last iteration).
-smert$random_effects are the predicted random effects for each individual.
-smert$omega are the predicted stochastic processes.
-plot(smerf$Vraisemblance) #evolution of the log-likelihood.
+sreemt <- REEMtree(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
+sreemt$forest # is the fitted random forest (obtaind at the last iteration).
+sreemt$random_effects are the predicted random effects for each individual.
+sreemt$omega are the predicted stochastic processes.
+plot(sreemt$Vraisemblance) #evolution of the log-likelihood.
 }
 }

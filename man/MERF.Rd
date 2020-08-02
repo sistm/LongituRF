@@ -54,7 +54,12 @@ A fitted (S)MERF model which is a list of the following elements: \itemize{
 }
 }
 \description{
-(S)MERF algorithm
+(S)MERF is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2014 \url{https://www.tandfonline.com/doi/abs/10.1080/00949655.2012.741599}).
+The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
+with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
+\eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
+which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
 }
 \examples{
 \dontrun{

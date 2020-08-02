@@ -1,19 +1,15 @@
 Package: LongituRF
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "Louis",
+Version: 0.9
+Authors@R: person(given = "Louis",
            family = "Capitaine",
            role = c("aut", "cre"),
-           email = "Louis.capitaine@u-bordeaux.fr",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.6.0)
+           email = "Louis.capitaine@u-bordeaux.fr")
+Description: Random forests are a statistical learning method widely used in many areas of scientific research essentially for its ability to learn complex relationships between input and output variables and also its capacity to handle high-dimensional data. However, current random forests approaches are not flexible enough to handle longitudinal data.  In this package, we propose a general approach of random forests for high-dimensional longitudinal data. It includes a flexible stochastic model which allows the covariance structure to vary over time. Furthermore, we introduce a new method which takes intra-individual covariance into consideration to build random forests.
 License: GPL-2
 Imports: stats, randomForest, rpart, mvtnorm
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: 
-    testthat
+Suggests: testthat
