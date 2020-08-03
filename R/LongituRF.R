@@ -109,7 +109,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai, logV.fbm(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,h))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,sigma_sto=sigma2, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
           class(sortie)<-"longituRF"
           return(sortie)
@@ -163,7 +163,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai,logV.exp(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,alpha))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc < delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, alpha = alpha, OOB =OOB, omega=omega2)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -198,7 +198,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         Vrai <- c(Vrai, logV(Y,fhat,Z,time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <-abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc < delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, OOB =OOB)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -235,7 +235,7 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
     if (inc < delta) {
-      print(paste0("stopped after", i, "iterations."))
+      print(paste0("stopped after ", i, " iterations."))
       sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)
       class(sortie) <- "longituRF"
       return(sortie)
@@ -755,7 +755,7 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         Vrai <- c(Vrai, logV.fbm(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,h))
         if (i>1) inc <- abs(Vrai[i-1]-Vrai[i])/abs(Vrai[i-1])
         if (inc< delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, Hurst=h, OOB =OOB, omega=omega2)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -813,7 +813,7 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
         Vrai <- c(Vrai, logV(Y,fhat,Z,time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
         if (inc< delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time =time, OOB =OOB)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -877,7 +877,8 @@ REEMforest <- function(X,Y,id,Z,iter=100,mtry,ntree=500, time, sto, delta = 0.00
     if (Vrai[i]<Vrai[i-1]) {reemfouille <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id, OOB =OOB)}
     }
     if (inc< delta) {
-      print(paste0("stopped after", i, "iterations."))
+      print(paste0("stopped after ", i, " iterations."))
+      class(reemfouille) <- "longituRF"
       return(reemfouille)
     }
   }
@@ -1016,7 +1017,7 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
         Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,0,sigmahat,"none"))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc< delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance = Vrai, id =id, time=time)
           class(sortie) <- "longituRF"
           return(sortie)
@@ -1054,7 +1055,7 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
-      print(paste0("stopped after", i, "iterations."))
+      print(paste0("stopped after ", i, " iterations."))
       sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat,id_omega=id_omega, id_btilde=unique(id),omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai, id = id)
       class(sortie) <- "longituRF"
       return(sortie)
@@ -1172,14 +1173,14 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
         Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,0,sigmahat,sto))
         if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
         if (inc <  delta) {
-          print(paste0("stopped after", i, "iterations."))
+          print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time)
           class(sortie) <- "longituRF"
           return(sortie)
         }
       }
       sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, Vraisemblance=Vrai, time =time, id=id )
-      class(sortie) <- 'longituRF'
+      class(sortie) <- "longituRF"
       return(sortie)
     }
   }
@@ -1225,7 +1226,7 @@ REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
     Vrai <- c(Vrai, logV(Y,fhat,Z[,,drop=FALSE],time,id,Btilde,sigma2,sigmahat,sto))
     if (i>1) inc <- (Vrai[i-1]-Vrai[i])/Vrai[i-1]
     if (inc< delta) {
-      print(paste0("stopped after", i, "iterations."))
+      print(paste0("stopped after ", i, " iterations."))
       sortie <- list(forest=tree,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), id_omega=id_omega, omega=omega, sigma_sto =sigma2, time = time, sto= sto,Vraisemblance=Vrai,id=id)
       class(sortie) <- "longituRF"
       return(sortie)
