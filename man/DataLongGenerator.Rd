@@ -27,12 +27,12 @@ Simulate longitudinal data according to the semi-parametric stochastic mixed-eff
 with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is a Brownian motion with volatility \eqn{\gamma^2=0.8} at time \eqn{t} for the \eqn{i}th individual; \eqn{\epsilon_i} is the residual error with
 variance \eqn{\sigma^2=0.5}.
-The data are simulated according to the simulations in low dimensional in the low dimensional scheme of the paper \url{https://arxiv.org/pdf/1901.11279.pdf}
+The data are simulated according to the simulations in low dimensional in the low dimensional scheme of the paper <doi:10.1177/0962280220946080>
 }
 \examples{
-\dontrun{
+oldpar <- par()
+oldopt <- options()
 data <- DataLongGenerator(n=17, p=6,G=6) # Generate the data
-
 # Let's see the output :
 w <- which(data$id==1)
 plot(data$time[w],data$Y[w],type="l",ylim=c(min(data$Y),max(data$Y)), col="grey")
@@ -40,23 +40,18 @@ for (i in unique(data$id)){
   w <- which(data$id==i)
   lines(data$time[w],data$Y[w], col='grey')
 }
-# Let's see the fixed effects predictors (need ggplot2):
-library(ggplot2)
-Inputs <- NULL
-for (i in 1:6){
-  Inputs <- rbind(Inputs,cbind(data$X[,i], data$id, data$time, rep(i,length(data$id))))
+# Let's see the fixed effects predictors:
+par(mfrow=c(2,3), mar=c(2,3,3,2))
+for (i in 1:ncol(data$X)){
+  w <- which(data$id==1)
+  plot(data$time[w],data$X[w,i], col="grey",ylim=c(min(data$X[,i]),
+  max(data$X[,i])),xlim=c(1,max(data$time)),main=latex2exp::TeX(paste0("$X^{(",i,")}$")))
+  for (k in unique(data$id)){
+    w <- which(data$id==k)
+    lines(data$time[w],data$X[w,i], col="grey")
+  }
 }
+par(oldpar)
+options(oldopt)
 
-Inputs <- as.data.frame(Inputs)
-names(Inputs)<- c("traj","id","time","variable")
-Inputs$id <- factor(Inputs$id, levels=sort(unique(Inputs$id)))
-
-compX <- ggplot(data = Inputs, aes(x=time, y=traj, group=id))+ theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-   panel.grid.major = element_blank())+geom_line(aes(col=id)) +
-  facet_wrap(~variable, labeller = label_bquote(X ^ (.(variable))),
-  scales="free")+ylab("")+guides(color=FALSE)
-
-compX
-}
 }

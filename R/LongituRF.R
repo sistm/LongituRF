@@ -1,7 +1,7 @@
 #' (S)MERF algorithm
 #'
-#' (S)MERF is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2014 \url{https://www.tandfonline.com/doi/abs/10.1080/00949655.2012.741599}).
-#' The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+#' (S)MERF is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2014) <doi:10.1080/00949655.2012.741599>.
+#' The model has been improved by Capitaine et. al. (2020) <doi:10.1177/0962280220946080> with the addition of a stochastic process.
 #' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 #' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 #' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
@@ -37,10 +37,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(123)
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
-#' # Train a SMERF model on the generated data. Should take ~ 50 secondes
+#' # Train a SMERF model on the generated data. Should take ~ 50 seconds
 #' # The data are generated with a Brownian motion,
 #' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
 #' smerf <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
@@ -49,7 +48,7 @@
 #' smerf$omega # are the predicted stochastic processes.
 #' plot(smerf$Vraisemblance) # evolution of the log-likelihood.
 #' smerf$OOB # OOB error at each iteration.
-#' }
+#'
 #'
 MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto, delta = 0.001){
   q <- dim(Z)[2]
@@ -322,7 +321,7 @@ gam_sto <- function(sigma,id,Z, Btilde, time, sigma2,sto, omega){
 #'
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples \donttest{
 #' set.seed(123)
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 #' REEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")
@@ -623,7 +622,9 @@ Moy <- function(id,Btilde,sigmahat,Phi,Y,Z){
 
 #' (S)REEMforest algorithm
 #'
-#' (S)REEMforest is an adaptation of the random forest regression method to longitudinal data introduced by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}).
+#'
+#'
+#' (S)REEMforest is an adaptation of the random forest regression method to longitudinal data introduced by Capitaine et. al. (2020) <doi:10.1177/0962280220946080>.
 #' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 #' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 #' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
@@ -659,8 +660,7 @@ Moy <- function(id,Btilde,sigmahat,Phi,Y,Z){
 #' }
 #' @export
 #'
-#' @examples
-#' \dontrun{
+#' @examples \donttest{
 #' set.seed(123)
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 #' # Train a SREEMforest model on the generated data. Should take ~ 50 secondes
@@ -928,8 +928,9 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 
 #' (S)MERT algorithm
 #'
-#' (S)MERT is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2011 \url{https://www.sciencedirect.com/science/article/abs/pii/S0167715210003433}).
-#' The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+#'
+#' (S)MERT is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2011) <doi:10.1016/j.spl.2010.12.003>.
+#' The model has been improved by Capitaine et. al. (2020) <doi:10.1177/0962280220946080> with the addition of a stochastic process.
 #' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 #' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 #' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
@@ -966,7 +967,6 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(123)
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 #' # Train a SMERF model on the generated data. Should take ~ 50 secondes
@@ -976,8 +976,8 @@ Moy_exp <- function(id,Btilde,sigmahat,Phi,Y,Z, alpha, time, sigma2){
 #' smert$forest # is the fitted random forest (obtained at the last iteration).
 #' smert$random_effects # are the predicted random effects for each individual.
 #' smert$omega # are the predicted stochastic processes.
-#' plot(smerf$Vraisemblance) #evolution of the log-likelihood.
-#' }
+#' plot(smert$Vraisemblance) #evolution of the log-likelihood.
+#'
 #'
 MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
   q <- dim(Z)[2]
@@ -1069,7 +1069,8 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
 
 #' (S)REEMtree algorithm
 #'
-#' (S)REEMtree is an adaptation of the random forest regression method to longitudinal data introduced by Sela and Simonoff. (2012 \url{https://link.springer.com/article/10.1007/s10994-011-5258-3}).
+#'
+#' (S)REEMtree is an adaptation of the random forest regression method to longitudinal data introduced by Sela and Simonoff. (2012) <doi:10.1007/s10994-011-5258-3>.
 #' The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 #' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 #' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
@@ -1107,19 +1108,20 @@ MERT <- function(X,Y,id,Z,iter=100,time, sto, delta = 0.001){
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(123)
 #' data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
-#' # Train a SMERF model on the generated data. Should take ~ 50 secondes
+#' # Train a SREEMtree model on the generated data.
 #' # The data are generated with a Brownian motion,
 #' # so we use the parameter sto="BM" to specify a Brownian motion as stochastic process
-#' sreemt <- REEMtree(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
+#' X.fixed.effects <- as.data.frame(data$X)
+#' sreemt <- REEMtree(X=X.fixed.effects,Y=data$Y,Z=data$Z,id=data$id,time=data$time,
+#' sto="BM", delta=0.0001)
 #' sreemt$forest # is the fitted random forest (obtained at the last iteration).
 #' sreemt$random_effects # are the predicted random effects for each individual.
 #' sreemt$omega # are the predicted stochastic processes.
 #' plot(sreemt$Vraisemblance) #evolution of the log-likelihood.
-#' }
-REEMtree <- function(X,Y,id,Z,iter, time, sto, delta = 0.001){
+#'
+REEMtree <- function(X,Y,id,Z,iter=10, time, sto, delta = 0.001){
   q <- dim(Z)[2]
   nind <- length(unique(id))
   btilde <- matrix(0,nind,q) #### Pour la ligne i, on a les effets al?atoires de l'individu i
@@ -1815,17 +1817,19 @@ logV.exp <- function(Y, fhat, Z, time, id, B, sigma2,sigmahat,H){
 
 #' Longitudinal data generator
 #'
+#'
 #' Simulate longitudinal data according to the semi-parametric stochastic mixed-effects model given by: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 #' with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 #' \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is a Brownian motion with volatility \eqn{\gamma^2=0.8} at time \eqn{t} for the \eqn{i}th individual; \eqn{\epsilon_i} is the residual error with
 #' variance \eqn{\sigma^2=0.5}.
-#' The data are simulated according to the simulations in low dimensional in the low dimensional scheme of the paper \url{https://arxiv.org/pdf/1901.11279.pdf}
+#' The data are simulated according to the simulations in low dimensional in the low dimensional scheme of the paper <doi:10.1177/0962280220946080>
 #'
 #' @param n [numeric]: Number of individuals. The default value is \code{n=50}.
 #' @param p [numeric]: Number of predictors. The default value is \code{p=6}.
 #' @param G [numeric]: Number of groups of predictors with temporal behavior, generates \code{p-G} input variables with no temporal behavior.
 #'
 #' @import mvtnorm
+#' @import latex2exp
 #'
 #' @return a list of the following elements: \itemize{
 #' \item \code{Y:} vector of the output trajectories.
@@ -1837,9 +1841,10 @@ logV.exp <- function(Y, fhat, Z, time, id, B, sigma2,sigmahat,H){
 #'
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples
+#' oldpar <- par()
+#' oldopt <- options()
 #' data <- DataLongGenerator(n=17, p=6,G=6) # Generate the data
-#'
 #' # Let's see the output :
 #' w <- which(data$id==1)
 #' plot(data$time[w],data$Y[w],type="l",ylim=c(min(data$Y),max(data$Y)), col="grey")
@@ -1847,25 +1852,20 @@ logV.exp <- function(Y, fhat, Z, time, id, B, sigma2,sigmahat,H){
 #'   w <- which(data$id==i)
 #'   lines(data$time[w],data$Y[w], col='grey')
 #' }
-#' # Let's see the fixed effects predictors (need ggplot2):
-#' library(ggplot2)
-#' Inputs <- NULL
-#' for (i in 1:6){
-#'   Inputs <- rbind(Inputs,cbind(data$X[,i], data$id, data$time, rep(i,length(data$id))))
+#' # Let's see the fixed effects predictors:
+#' par(mfrow=c(2,3), mar=c(2,3,3,2))
+#' for (i in 1:ncol(data$X)){
+#'   w <- which(data$id==1)
+#'   plot(data$time[w],data$X[w,i], col="grey",ylim=c(min(data$X[,i]),
+#'   max(data$X[,i])),xlim=c(1,max(data$time)),main=latex2exp::TeX(paste0("$X^{(",i,")}$")))
+#'   for (k in unique(data$id)){
+#'     w <- which(data$id==k)
+#'     lines(data$time[w],data$X[w,i], col="grey")
+#'   }
 #' }
+#' par(oldpar)
+#' options(oldopt)
 #'
-#' Inputs <- as.data.frame(Inputs)
-#' names(Inputs)<- c("traj","id","time","variable")
-#' Inputs$id <- factor(Inputs$id, levels=sort(unique(Inputs$id)))
-#'
-#' compX <- ggplot(data = Inputs, aes(x=time, y=traj, group=id))+ theme_bw() +
-#'   theme(panel.grid.minor = element_blank(),
-#'    panel.grid.major = element_blank())+geom_line(aes(col=id)) +
-#'   facet_wrap(~variable, labeller = label_bquote(X ^ (.(variable))),
-#'   scales="free")+ylab("")+guides(color=FALSE)
-#'
-#' compX
-#' }
 DataLongGenerator <- function(n=50,p=6,G=6){
 
   mes <-floor(4*runif(n)+8)

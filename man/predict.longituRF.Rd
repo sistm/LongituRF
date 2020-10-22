@@ -26,7 +26,7 @@ vector of the predicted output for the new observations.
 Predict with longitudinal trees and random forests.
 }
 \examples{
-\dontrun{
+\donttest{
 set.seed(123)
 data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 REEMF <- REEMforest(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,mtry=2,ntree=500,sto="BM")

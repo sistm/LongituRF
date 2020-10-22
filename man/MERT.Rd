@@ -38,15 +38,14 @@ A fitted (S)MERF model which is a list of the following elements: \itemize{
 }
 }
 \description{
-(S)MERT is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2011 \url{https://www.sciencedirect.com/science/article/abs/pii/S0167715210003433}).
-The model has been improved by Capitaine et. al. (2020 \url{https://arxiv.org/pdf/1901.11279.pdf}) with the addition of a stochastic process.
+(S)MERT is an adaptation of the random forest regression method to longitudinal data introduced by Hajjem et. al. (2011) <doi:10.1016/j.spl.2010.12.003>.
+The model has been improved by Capitaine et. al. (2020) <doi:10.1177/0962280220946080> with the addition of a stochastic process.
 The algorithm will estimate the parameters of the following semi-parametric stochastic mixed-effects model: \deqn{Y_i(t)=f(X_i(t))+Z_i(t)\beta_i + \omega_i(t)+\epsilon_i}
 with \eqn{Y_i(t)} the output at time \eqn{t} for the \eqn{i}th individual; \eqn{X_i(t)} the input predictors (fixed effects) at time \eqn{t} for the \eqn{i}th individual;
 \eqn{Z_i(t)} are the random effects at time \eqn{t} for the \eqn{i}th individual; \eqn{\omega_i(t)} is the stochastic process at time \eqn{t} for the \eqn{i}th individual
  which model the serial correlations of the output measurements; \eqn{\epsilon_i} is the residual error.
 }
 \examples{
-\dontrun{
 set.seed(123)
 data <- DataLongGenerator(n=20) # Generate the data composed by n=20 individuals.
 # Train a SMERF model on the generated data. Should take ~ 50 secondes
@@ -56,7 +55,7 @@ smert <- MERF(X=data$X,Y=data$Y,Z=data$Z,id=data$id,time=data$time,sto="BM")
 smert$forest # is the fitted random forest (obtained at the last iteration).
 smert$random_effects # are the predicted random effects for each individual.
 smert$omega # are the predicted stochastic processes.
-plot(smerf$Vraisemblance) #evolution of the log-likelihood.
-}
+plot(smert$Vraisemblance) #evolution of the log-likelihood.
+
 
 }
