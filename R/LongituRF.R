@@ -1941,3 +1941,40 @@ DataLongGenerator <- function(n=50,p=6,G=6){
   return(list(Y=Y,X=X,Z=Z,id=id, time=time))
 }
 
+
+#### Fonction score de stabilité::
+
+Stability_Score <- function(X,Y,Z,id,time,mtry,ntree, sto="BM",method="MERF", eta = c(1:ncol(X)),nvars=c(1:ncol(X))){
+
+  if (method=="REEMforest"){
+    sortie1 <- REEMforest(X=X,Y=Y,Z=Z,id=id,time=time,mtry=mtry,ntree=ntree,sto=sto)
+    sortie2 <- REEMforest(X=X,Y=Y,Z=Z,id=id,time=time,mtry=mtry,ntree=ntree,sto=sto)
+  }
+
+  else {
+    sortie1 <- MERF(X=X,Y=Y,Z=Z,id=id,time=time,mtry=mtry,ntree=ntree,sto=sto)
+    sortie2 <- MERF(X=X,Y=Y,Z=Z,id=id,time=time,mtry=mtry,ntree=ntree,sto=sto)
+  }
+
+  imp1 <- sort(sortie1$forest$importance[,1], decreasing = TRUE, index.return=TRUE)
+  imp2 <- sort(sortie2$forest$importance[,1], decreasing = TRUE, index.return=TRUE)
+
+  ss <- matrix(NA,length(eta),length(nvars))
+  for (i in 1:length(eta)){
+    for (k in 1:length(nvars)){
+      nind = rep(0,nvars[k])
+      for (l in 1:nvars[k]){
+        variable = imp1$ix[l]
+        variable2_interv = imp2$ix[c(max(1,l-eta[i]):min(nvars[k],l+eta[i]))]
+        nind[l] = 1*length(which(variable2_interv == variable)>0)
+      }
+      ss[i,k] = mean(nind)
+    }
+  }
+  SS <- as.data.frame(ss)
+  colnames(SS) = nvars
+  rownames(SS) = eta
+  return(SS)
+}
+
+
