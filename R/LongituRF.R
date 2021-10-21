@@ -1958,6 +1958,8 @@ DataLongGenerator <- function(n=50,p=6,G=6){
 #' @param eta [numeric]: The size of the neighborhood for the stability score. Can be a vector, in this case, returns the stability scores corresponding to all the values of the vector.
 #' @param nvars [numeric]: The number of variables to consider among the most impotant variables. Can be a vector, in this case, the function returns the stability scores corresponding to all the values of the vector.
 #'
+#' @export
+#'
 #' @return A matrix with all the stability scores corresponding to the eta and nvars values. The $i$th row corresponds to the $i$th value of eta while the $i$th column corresponds to the $i$ value of nvars.
 #
 Stability_Score <- function(X,Y,Z,id,time,mtry,ntree, sto="BM",method="MERF", eta = c(1:ncol(X)),nvars=c(1:ncol(X))){
