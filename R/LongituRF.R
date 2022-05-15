@@ -195,7 +195,8 @@ MERF <- function(X,Y,id,Z,iter=100,mtry=ceiling(ncol(X)/3),ntree=500, time, sto,
         sigmahat <- sig(sigma = sigmahat,id = id, Z = Z, epsilon = epsilonhat,Btilde = Btilde)
         Btilde  <- bay(bhat = btilde,Bhat = Btilde,Z = Z,id = id,sigmahat = sigm)
         Vrai <- c(Vrai, logV(Y,fhat,Z,time,id,Btilde,0,sigmahat,sto))
-        if (i>1) inc <-abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
+        if (i>1) inc <- abs((Vrai[i-1]-Vrai[i])/Vrai[i-1])
+
         if (inc < delta) {
           print(paste0("stopped after ", i, " iterations."))
           sortie <- list(forest=forest,random_effects=btilde,var_random_effects=Btilde,sigma=sigmahat, id_btilde=unique(id), sto= sto, vraisemblance = Vrai,id=id, time=time, OOB =OOB)
@@ -1271,7 +1272,10 @@ logV <- function(Y,f,Z,time,id,B,gamma,sigma, sto){
     for (i in 1:length(unique(id))){
       w <- which(id==unique(id)[i])
       V <- Z[w,,drop=FALSE]%*%B%*%t(Z[w,,drop=FALSE])+diag(as.numeric(sigma),length(w),length(w))
-      Vraisem <- Vraisem + log(det(V))+ t(Y[w]-f[w])%*%solve(V)%*%(Y[w]-f[w])
+      V2 = log(det(V))+ t(Y[w]-f[w])%*%solve(V)%*%(Y[w]-f[w])
+      if (V2<Inf){
+        Vraisem <- Vraisem + V2
+      }
     }
     return(Vraisem)
   }
